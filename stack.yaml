@@ -1,0 +1,7 @@
+resolver: lts-12.10
+
+packages:
+- .
+
+nix:
+  enable: true
