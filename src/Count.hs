@@ -53,9 +53,11 @@ instance Codec Count where
 
   type Decoded Count = Int
 
-  encode i = error "Codec.Count not implemented"
+  encode i = Count $ replicate i false <> [true]
 
-  decode sol (Count xs) = error "Codec.Count not implemented"
+  decode sol (Count xs) = do
+    bs <- traverse (decode sol) xs
+    pure $ fromIntegral . fst . head . filter (not . snd) $ zip [0..] bs
 
 ------------------------------------------------------------------------
 
@@ -70,7 +72,7 @@ instance Choice Count where
 
 -- | Increment the value of a 'Count' by one.
 increment :: Count -> Count
-increment (Count xs) = error "increment not implemented"
+increment (Count xs) = Count $ false : xs
 
 -- | Decrement the value of a 'Count' by one. Decrement of zero is zero.
 decrement :: Count -> Count
@@ -81,7 +83,7 @@ decrement (Count xs) =
 
 -- | Add a bit representing a zero or one to the count.
 addBit :: Bit -> Count -> Count
-addBit bit count = error "addBit not implemented"
+addBit bit count = choice count (increment count) bit
 
 ------------------------------------------------------------------------
 
