@@ -134,7 +134,7 @@ isValidSolution puzzle clicked = allOff
     isClicked    c = Map.findWithDefault false c clicked
 
     isOn          :: Coord -> Bit
-    isOn         x = error "isValidSolution.isOn not implemented"
+    isOn         x = foldr xor (initialState x) (isClicked <$> neighborhood x)
 
 ------------------------------------------------------------------------
 
