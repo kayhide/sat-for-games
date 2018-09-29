@@ -1,4 +1,4 @@
-{-# Language QuasiQuotes #-}
+{-# LANGUAGE QuasiQuotes #-}
 {-|
 Module      : Zhed
 Description : Solver for Zhed
@@ -24,18 +24,21 @@ For more puzzle files, see https://github.com/glguy/5puzzle/tree/master/zhed-puz
 -}
 module Zhed where
 
+import           Prelude            ()
+
 -- base
-import           Prelude ()
 import           Control.Monad      (replicateM)
 import           Data.Char          (digitToInt, isDigit)
 import           Data.Foldable      (foldl')
-import           Data.List.NonEmpty (NonEmpty((:|)))
+import           Data.List.NonEmpty (NonEmpty ((:|)))
 
 -- sat-for-games
+import           Choice             (choice)
+import           Count              (Count, addBit, increment)
 import           Ersatz.Prelude
-import           Count    (Count, addBit)
-import           Select   (Select, runSelect, selectPermutationN, selectList)
-import           TotalMap (TotalMap, fromList, (!), (=:))
+import           Select             (Select, runSelect, selectList,
+                                     selectPermutationN)
+import           TotalMap           (TotalMap, fromList, (!), (=:))
 
 -- | Grid coordinate
 data Coord = C Int Int -- ^ column row
@@ -152,13 +155,20 @@ spreadCell ::
   (Count, TotalMap Coord Bit) {- ^ squares placed and current board  -} ->
   Coord                       {- ^ coordinate to place on            -} ->
   (Count, TotalMap Coord Bit) {- ^ updated placement count and board -}
-spreadCell len (used, cells) coord = error "spreadCell not implemented"
+spreadCell len orig@(used, cells) coord =
+  choice orig (increment used, (coord =: true) cells) placing
+  where
+    placing :: Bit
+    placing = not (cells ! coord) && (used <? encode len)
 
 
 -- | Combine the choice of square to activate with a direction to
 -- get back a single choice containing both.
 combineChoices :: Select (Coord, Int) -> Select Dir -> Select (Coord, Int, Dir)
-combineChoices selectSq selectDir = error "combineChoices: not implemented"
+combineChoices selectSq selectDir = do
+  (coord, i) <- selectSq
+  dir <- selectDir
+  pure (coord, i, dir)
 
 
 -- | Generate a solution that satisfies the clues in the given puzzle.

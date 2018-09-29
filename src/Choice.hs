@@ -23,3 +23,6 @@ class Choice a where
 
 instance Choice Bit where
   choice = choose
+
+instance (Choice a, Choice b) => Choice (a, b) where
+  choice (fa, fb) (ta, tb) b = (choice fa ta b, choice fb tb b)
